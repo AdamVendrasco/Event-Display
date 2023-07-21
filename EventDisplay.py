@@ -19,11 +19,8 @@ directory_pattern = '/collab/project/snowmass21/data/muonc/fmeloni/DataMuC_MuCol
 file_paths = glob.glob(directory_pattern)
 reader.open(file_paths)
 
-#Initalizing entries
-
 # looping over all events in the file
 for ievt, event in enumerate(reader):
-  
     
   pfoCollection = event.getCollection('PandoraPFOs')
   trkCollection = event.getCollection('SiTracks_Refitted')    
@@ -62,12 +59,9 @@ for ievt, event in enumerate(reader):
       ele=TGraph()
       ele.SetPoint(0, phipos, etapos)
       ele.SetMarkerStyle(24)
-      #ele.SetMarkerColorAlpha(i, i-(0.1*i))
       ele.SetMarkerColor(kBlue)  
       ele.SetMarkerSize(log(pfo.getEnergy()))
       mg.Add(ele)
-      print("event",str(ievt),"electron energy:",str(pfo.getEnergy()))   
-      #leg.AddEntry(ele,"Electron","p")
 
     if fabs(pfo.getType())==2112:    
       dp3 = pfo.getMomentum()
@@ -82,9 +76,6 @@ for ievt, event in enumerate(reader):
       neut.SetMarkerStyle(24)
       neut.SetMarkerSize(log(pfo.getEnergy()))
       mg.Add(neut)
-      print("event",str(ievt),"neut energy:",str(pfo.getEnergy()))
-      #leg.AddEntry(neut,"neut","p")
-
 
     if fabs(pfo.getType())==22:    
       dp3 = pfo.getMomentum()
@@ -100,19 +91,14 @@ for ievt, event in enumerate(reader):
       pho.SetMarkerSize(log(pfo.getEnergy()))                        
       mg.Add(pho)
 
-      #leg.AddEntry(pho,"pho","p")
-      print("event",str(ievt),"pho energy:",str(pfo.getEnergy()))
-
-
 
   c2=TCanvas("c%i"%ievt,"c%i"%ievt,700,500)
   mg.Draw("APL")
-  print(mg.GetListOfGraphs())
   mg.SetTitle("Event Display;Phi;Eta")
   mg.GetXaxis().SetLimits(-3.14,3.14)
   mg.GetYaxis().SetRangeUser(-3.14,3.14)
   leg = TLegend(0.65,0.65,0.9,0.9)                             
   leg.Draw()
   reader.close()
-  c2.SaveAs("eventDisplay/Event%i.png"%ievt)
+  c2.SaveAs("Event%i.png"%ievt)
 
