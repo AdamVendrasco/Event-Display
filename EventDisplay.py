@@ -93,7 +93,7 @@ for ievt, event in enumerate(reader):
   mg.GetXaxis().SetLimits(-3.14,3.14)
   mg.GetYaxis().SetRangeUser(-3.14,3.14)
 
-  #Manually mkaing Legend
+  #Manually making legend
   TL1=TLatex(1,2.5,"Electron") 
   TL2=TLatex(1,2.0,"Neutron")
   TL3=TLatex(1,1.5,"Photon")
