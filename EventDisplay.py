@@ -26,8 +26,8 @@ for ievt, event in enumerate(reader):
   trkCollection = event.getCollection('SiTracks_Refitted')    
   mcpCollection = event.getCollection('MCParticle')
 
-  mg=TMultiGraph("mg%i"%ievt,"mg%i"%ievt)
-
+  mg=TMultiGraph("mg%i"%ievt,"mg%i"%ievt) 
+  leg = TLegend(0.65,0.65,0.9,0.9)                             
   '''
   #within file for only MC particles   
   for mcp in mcpCollection:
@@ -46,14 +46,13 @@ for ievt, event in enumerate(reader):
               if tlv.Theta() > 30.*TMath.Pi()/180. and tlv.Theta() < 150.*TMath.Pi()/180.:
                   goodtheta = True
               if tlv.Perp() > 1 and not mcp.isDecayedInTracker() and goodtheta:
-  '''                
+  ''' 
   for pfo in pfoCollection:
       
     if fabs(pfo.getType()) == 11:
       dp3 = pfo.getMomentum()
       tlv_pfo = TLorentzVector()
       tlv_pfo.SetPxPyPzE(dp3[0], dp3[1], dp3[2], pfo.getEnergy())
-      
       phipos= tlv_pfo.Phi()
       etapos=tlv_pfo.Eta()
       ele=TGraph()
@@ -62,12 +61,11 @@ for ievt, event in enumerate(reader):
       ele.SetMarkerColor(kBlue)  
       ele.SetMarkerSize(log(pfo.getEnergy()))
       mg.Add(ele)
-
+    
     if fabs(pfo.getType())==2112:    
       dp3 = pfo.getMomentum()
       tlv_pfo = TLorentzVector()
       tlv_pfo.SetPxPyPzE(dp3[0], dp3[1], dp3[2], pfo.getEnergy())
-      
       phipos=tlv_pfo.Phi()
       etapos=tlv_pfo.Eta()
       neut = TGraph()
@@ -81,7 +79,6 @@ for ievt, event in enumerate(reader):
       dp3 = pfo.getMomentum()
       tlv_pfo = TLorentzVector()
       tlv_pfo.SetPxPyPzE(dp3[0], dp3[1], dp3[2], pfo.getEnergy())
-      
       phipos=tlv_pfo.Phi()
       etapos=tlv_pfo.Eta()
       pho=TGraph()
@@ -91,14 +88,39 @@ for ievt, event in enumerate(reader):
       pho.SetMarkerSize(log(pfo.getEnergy()))                        
       mg.Add(pho)
 
-
   c2=TCanvas("c%i"%ievt,"c%i"%ievt,700,500)
   mg.Draw("APL")
   mg.SetTitle("Event Display;Phi;Eta")
   mg.GetXaxis().SetLimits(-3.14,3.14)
   mg.GetYaxis().SetRangeUser(-3.14,3.14)
-  leg = TLegend(0.65,0.65,0.9,0.9)                             
-  leg.Draw()
+
+  TL1=TLatex(1,2.5,"Electron") 
+  TL2=TLatex(1,2.0,"Neutron")
+  TL3=TLatex(1,1.5,"Photon")
+
+  TL1.SetTextFont(42)
+  TL2.SetTextFont(42)
+  TL3.SetTextFont(42)
+
+  Ecircle=TEllipse(2.2,2.6,0.11,0.15)
+  Ncircle=TEllipse(2.2,2.1,0.11,0.15)
+  Pcircle=TEllipse(2.2,1.6,0.11,0.15)
+
+  Ecircle.SetLineColor(kBlue)
+  Ncircle.SetLineColor(kRed)
+  Pcircle.SetLineColor(kGreen)
+
+  Ecircle.SetLineWidth(1)
+  Ncircle.SetLineWidth(1)
+  Pcircle.SetLineWidth(1)
+
+  Ecircle.Draw()
+  Ncircle.Draw()
+  Pcircle.Draw()
+  TL1.Draw()
+  TL2.Draw()
+  TL3.Draw()
+
   reader.close()
-  c2.SaveAs("Event%i.png"%ievt)
+  c2.SaveAs("event%i.png"%ievt)
 
