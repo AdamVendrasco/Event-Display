@@ -2,16 +2,14 @@ from pyLCIO import IOIMPL
 from pyLCIO import EVENT, UTIL
 from ROOT import *
 from math import *
-from optparse import OptionParser
-from array import array
 import os
 import glob
-import fnmatch
 #########################
 #tdrstyle.setTDRStyle()
 gROOT.SetBatch()
-#Create a reader and open an LCIO file
-#Find all files matching the directory pattern
+
+#Create a reader
+#Find all files matching the directory pattern. Currently only reading in one file
 
 reader = IOIMPL.LCFactory.getInstance().createLCReader()
 #directory_pattern = '/collab/project/snowmass21/data/muonc/fmeloni/DataMuC_MuColl_v1/electronGun/reco/*.slcio'
@@ -27,7 +25,6 @@ for ievt, event in enumerate(reader):
   mcpCollection = event.getCollection('MCParticle')
 
   mg=TMultiGraph("mg%i"%ievt,"mg%i"%ievt) 
-  leg = TLegend(0.65,0.65,0.9,0.9)                             
   '''
   #within file for only MC particles   
   for mcp in mcpCollection:
@@ -46,9 +43,10 @@ for ievt, event in enumerate(reader):
               if tlv.Theta() > 30.*TMath.Pi()/180. and tlv.Theta() < 150.*TMath.Pi()/180.:
                   goodtheta = True
               if tlv.Perp() > 1 and not mcp.isDecayedInTracker() and goodtheta:
-  ''' 
+  '''
+  #gets relevant pfos
   for pfo in pfoCollection:
-      
+
     if fabs(pfo.getType()) == 11:
       dp3 = pfo.getMomentum()
       tlv_pfo = TLorentzVector()
@@ -88,12 +86,14 @@ for ievt, event in enumerate(reader):
       pho.SetMarkerSize(log(pfo.getEnergy()))                        
       mg.Add(pho)
 
+  #draws multigraph
   c2=TCanvas("c%i"%ievt,"c%i"%ievt,700,500)
   mg.Draw("APL")
-  mg.SetTitle("Event Display;Phi;Eta")
+  mg.SetTitle("Event Display;#phi;#eta")
   mg.GetXaxis().SetLimits(-3.14,3.14)
   mg.GetYaxis().SetRangeUser(-3.14,3.14)
 
+  #Manually mkaing Legend
   TL1=TLatex(1,2.5,"Electron") 
   TL2=TLatex(1,2.0,"Neutron")
   TL3=TLatex(1,1.5,"Photon")
