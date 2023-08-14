@@ -13,10 +13,11 @@ gROOT.SetBatch()
 
 reader = IOIMPL.LCFactory.getInstance().createLCReader()
 #directory_pattern = '/collab/project/snowmass21/data/muonc/fmeloni/DataMuC_MuColl_v1/electronGun/reco/*.slcio'
-directory_pattern = '/collab/project/snowmass21/data/muonc/fmeloni/DataMuC_MuColl_v1/electronGun/reco/electronGun_reco_0.slcio' 
+directory_pattern = '/collab/project/snowmass21/data/muonc/fmeloni/LegacyProductions/before29Jul23/DataMuC_MuColl_v1/electronGun/reco/electronGun_reco_0.slcio' 
 file_paths = glob.glob(directory_pattern)
 reader.open(file_paths)
-
+mcpe=[]
+pfoe=[]
 # looping over all events in the file
 for ievt, event in enumerate(reader):
     
@@ -59,7 +60,10 @@ for ievt, event in enumerate(reader):
       ele.SetMarkerColor(kBlue)  
       ele.SetMarkerSize(log(pfo.getEnergy()))
       mg.Add(ele)
-    
+      #print("pfo e- "+str(pfo.getEnergy()))
+      #totalpfo=sum(float(pfo.getEnergy()))
+      pfoe.append(pfo.getEnergy())
+     
     if fabs(pfo.getType())==2112:    
       dp3 = pfo.getMomentum()
       tlv_pfo = TLorentzVector()
@@ -72,7 +76,7 @@ for ievt, event in enumerate(reader):
       neut.SetMarkerStyle(24)
       neut.SetMarkerSize(log(pfo.getEnergy()))
       mg.Add(neut)
-
+        
     if fabs(pfo.getType())==22:    
       dp3 = pfo.getMomentum()
       tlv_pfo = TLorentzVector()
@@ -85,41 +89,73 @@ for ievt, event in enumerate(reader):
       pho.SetMarkerStyle(24)
       pho.SetMarkerSize(log(pfo.getEnergy()))                        
       mg.Add(pho)
+  
+  for mcp in mcpCollection:
+    if fabs(mcp.getPDG()) == 11:
+      dp3 = mcp.getMomentum()
+      tlv_mcp = TLorentzVector()
+      tlv_mcp.SetPxPyPzE(dp3[0], dp3[1], dp3[2], mcp.getEnergy())
+      phipos= tlv_mcp.Phi()
+      etapos=tlv_mcp.Eta()
+      mcp_ele=TGraph()
+      mcp_ele.SetPoint(0, phipos, etapos)
+      mcp_ele.SetMarkerStyle(24)
+      mcp_ele.SetMarkerColor(kMagenta)  
+      #mcp_ele.SetMarkerSize(log(mcp.getEnergy()))
+      mg.Add(mcp_ele)
+      #print("mcp e- "+str(mcp.getEnergy()))
+      mcpe.append(mcp.getEnergy())
+  
+  print("sum of pfo Energy: ")
+  print(sum(pfoe))
+
+
+  print("sum of mcp Energy: ")
+  print(sum(mcpe))
+
 
   #draws multigraph
   c2=TCanvas("c%i"%ievt,"c%i"%ievt,700,500)
   mg.Draw("APL")
-  mg.SetTitle("Event Display;#phi;#eta")
-  mg.GetXaxis().SetLimits(-3.14,3.14)
-  mg.GetYaxis().SetRangeUser(-3.14,3.14)
+  mg.SetTitle("PFO Event Display;#phi;#eta")
+  mg.GetXaxis().SetLimits(-4,4)
+  mg.GetYaxis().SetRangeUser(-4,4)
 
   #Manually making legend
-  TL1=TLatex(1,2.5,"Electron") 
-  TL2=TLatex(1,2.0,"Neutron")
-  TL3=TLatex(1,1.5,"Photon")
+  TL1=TLatex(2,3.5,"Electron") 
+  TL2=TLatex(2,3.0,"Neutron")
+  TL3=TLatex(2,2.5,"Photon")
+  TL4=TLatex(1.2,2.0,"mcp Electron")
 
   TL1.SetTextFont(42)
   TL2.SetTextFont(42)
   TL3.SetTextFont(42)
+  TL4.SetTextFont(42)
 
-  Ecircle=TEllipse(2.2,2.6,0.11,0.15)
-  Ncircle=TEllipse(2.2,2.1,0.11,0.15)
-  Pcircle=TEllipse(2.2,1.6,0.11,0.15)
+  Ecircle=TEllipse(3.4,3.6,0.15,0.18)
+  Ncircle=TEllipse(3.4,3.1,0.15,0.18)
+  Pcircle=TEllipse(3.4,2.6,0.15,0.18)
+  MCPele=TEllipse(3.4,2.1,0.15,0.18)
 
   Ecircle.SetLineColor(kBlue)
   Ncircle.SetLineColor(kRed)
   Pcircle.SetLineColor(kGreen)
+  MCPele.SetLineColor(kMagenta)
 
   Ecircle.SetLineWidth(1)
   Ncircle.SetLineWidth(1)
   Pcircle.SetLineWidth(1)
+  MCPele.SetLineWidth(1)
 
   Ecircle.Draw()
   Ncircle.Draw()
   Pcircle.Draw()
+  MCPele.Draw()
+
   TL1.Draw()
   TL2.Draw()
   TL3.Draw()
+  TL4.Draw()
 
   reader.close()
   c2.SaveAs("event%i.png"%ievt)
